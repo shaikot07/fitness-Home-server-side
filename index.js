@@ -37,18 +37,20 @@ async function run() {
 
 
 // all serveces reletade data jonno code 
+// all services pawar jonno
       app.get('/services',async(req,res)=>{
             const cursor = servicesCollection.find();
             const result = await cursor.toArray();
             res.send(result)
       })
-
+      // UI theke booking korle bookings namer collection a sev hbe 
       app.post('/bookings',async(req,res)=>{
             const booking = req.body;
             console.log(booking);
             const result = await bookingCollection.insertOne(booking)
             res.send(result)
       })
+      // UI theke added new services korle newservices namer collection a sev hbe 
       app.post('/newservices', async(req, res)=>{
             const addNewServices = req.body;
             const result = await newServicesCollection.insertOne(addNewServices)
