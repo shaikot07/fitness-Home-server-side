@@ -58,7 +58,11 @@ async function run() {
         })
          .send({success:true})
       })
-
+      app.post('/logout', async(req,res)=>{
+        const user = req.body;
+        console.log('logout user', user);
+        res.clearCookie('token',{maxAge: 0}).send({success:true})
+      })
 
 // all serveces reletade data jonno code 
 // all services pawar jonno
