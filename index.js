@@ -1,5 +1,7 @@
 const express = require('express')
 const cors = require('cors')
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app = express();
@@ -10,11 +12,13 @@ const port = process.env.PORT || 5000;
 app.use(cors({
   origin:[
     'http://localhost:5175',
-    'http://localhost:5173'
+    'http://localhost:5173',
+    'http://localhost:5000/newservices/654a1c38dd67dd324cc0acbc'
   ],
   credentials:true
 }));
 app.use(express.json())
+app.use(cookieParser())
 
 
 
@@ -42,6 +46,20 @@ async function run() {
 
 
 
+      // auth related code start 
+      app.post('/jwt',async(req,res)=>{
+        const user = req.body;
+        console.log('user for token', user);
+        const token = jwt.sign(user,process.env.TOKEN, {expiresIn: '1h'});
+        res.cookie('token', token,{
+          httpOnly:true,
+          secure:true,
+          
+        })
+         .send({success:true})
+      })
+
+
 // all serveces reletade data jonno code 
 // all services pawar jonno
       app.get('/services',async(req,res)=>{
@@ -56,6 +74,27 @@ async function run() {
             const result = await bookingCollection.insertOne(booking)
             res.send(result)
       })
+      
+      // send all booking data to the my booking pase to ui 
+      app.get('/bookings',async(req,res)=>{
+        const cursor = servicesCollection.find();
+        const result = await cursor.toArray();
+        res.send(result)
+  })
+  // booking statust relatede 
+      app.patch('/bookings/:id',async(req,res)=>{
+        const id = req.params.id;
+        const filter = {_id: new ObjectId(id)}
+        const update = req.body;
+        const updateDoc = {
+          $set:{
+            status:update.status
+          },
+        }
+        const result = await bookingCollection.updateOne(filter,updateDoc)
+        res.send(result)
+      })
+
       // UI theke added new services korle newservices namer collection a sev hbe 
       app.post('/newservices', async(req, res)=>{
             const addNewServices = req.body;
@@ -71,6 +110,24 @@ async function run() {
           // console.log(req.query.email);
         }
         const result = await newServicesCollection.find(query).toArray();
+        res.send(result);
+      })
+
+      app.patch('/newservices/:id',async(req,res)=>{
+        const id = req.params.id;
+        const filter = {_id: new ObjectId(id)};
+        const updateData = req.body;
+        console.log(updateData);
+        const updateDoc = {
+          $set:{
+            img:updateData.img,
+            serviceName:updateData.serviceName,
+            description:updateData.description,
+            price:updateData.price,
+            area:updateData.area
+          },
+        }
+        const result =await newServicesCollection.updateOne(filter, updateDoc);
         res.send(result);
       })
 
