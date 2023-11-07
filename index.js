@@ -7,7 +7,12 @@ const port = process.env.PORT || 5000;
 
 
 // middlewer 
-app.use(cors());
+app.use(cors({
+  origin:[
+    'http://localhost:5175'
+  ],
+  credentials:true
+}));
 app.use(express.json())
 
 
@@ -56,7 +61,17 @@ async function run() {
             const result = await newServicesCollection.insertOne(addNewServices)
             res.send(result)
       })
-
+// newServices data send to manage Services page Query by email 
+      app.get('/newservices',async(req,res)=>{
+        
+        let query = {};
+        if(req.query?.email){
+          query={email:req.query.email}
+          console.log(req.query.email);
+        }
+        const result = await newServicesCollection.find(query).toArray();
+        res.send(result);
+      })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
