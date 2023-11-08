@@ -35,6 +35,30 @@ const client = new MongoClient(uri, {
   }
 });
 
+
+
+
+// middele wers 
+
+const verifyToken = (req,res,next)=>{
+  const token = req?.cookies?.token;
+  // console.log('token in the medile wrer', token);
+  // no token available 
+  if(!token){
+      return res.status(401).send({message:'unauthorized access'})
+  }
+  jwt.verify(token,process.env.TOKEN,(err,decoded)=>{
+    if(err){
+      return res.status(401).send({message:'unauthorized access'})
+    }
+    req.user = decoded;
+    next();
+  })
+}
+
+
+
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -80,13 +104,13 @@ async function run() {
       })
       
       // send all booking data to the my booking pase to ui 
-      app.get('/bookings',async(req,res)=>{
+      app.get('/bookings',verifyToken,async(req,res)=>{
         const cursor = servicesCollection.find();
         const result = await cursor.toArray();
         res.send(result)
   })
   // booking statust relatede 
-      app.patch('/bookings/:id',async(req,res)=>{
+      app.patch('/bookings/:id',verifyToken,async(req,res)=>{
         const id = req.params.id;
         const filter = {_id: new ObjectId(id)}
         const update = req.body;
@@ -106,7 +130,11 @@ async function run() {
             res.send(result)
       })
 // newServices data send to manage Services page Query by email 
-      app.get('/newservices',async(req,res)=>{
+      app.get('/newservices',verifyToken ,async(req,res)=>{
+        
+        if(req.user.email !== req.query.email){
+          return res.status(403).send({message:'forbidden access'})
+        }
         
         let query = {};
         if(req.query?.email){
@@ -117,7 +145,7 @@ async function run() {
         res.send(result);
       })
 
-      app.patch('/newservices/:id',async(req,res)=>{
+      app.patch('/newservices/:id',verifyToken,async(req,res)=>{
         const id = req.params.id;
         const filter = {_id: new ObjectId(id)};
         const updateData = req.body;
