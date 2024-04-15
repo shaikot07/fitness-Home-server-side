@@ -111,9 +111,9 @@ async function run() {
       const result = await bookingCollection.insertOne(booking)
       res.send(result)
     })
-
+    // get data by email 
     // send all booking data to the my booking pase to ui 
-    app.get('/bookings', async (req, res) => { // To DO: verifyToken, ta add korte hbe 
+    app.get('/bookings',verifyToken, async (req, res) => { // To DO: verifyToken, ta add korte hbe 
       const email = req.query.email;
       console.log(email);
       const query = { email: email }
@@ -122,18 +122,7 @@ async function run() {
       res.send(result)
     })
 
-    // get data by email 
-    // app.get('/article/user', async (req, res) => {
-    //   const email = req.query.email;
-    //   // console.log("its a my card", email);
-    //   const query = { articleAuthorEmail: email }
-    //   const result = await articleCollection.find(query).toArray();
-    //   console.log(result);
-    //   res.send(result)
-    // });
-
-
-
+    
     // booking statust relatede 
     app.patch('/bookings/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
