@@ -17,7 +17,7 @@ app.use(cors({
     'https://assignment-11-clintside.netlify.app'
 
   ],
-  optionSuccessStatus:200,
+  optionSuccessStatus: 200,
   credentials: true
 }));
 
@@ -113,11 +113,27 @@ async function run() {
     })
 
     // send all booking data to the my booking pase to ui 
-    app.get('/bookings', verifyToken, async (req, res) => {
-      const cursor = servicesCollection.find();
-      const result = await cursor.toArray();
+    app.get('/bookings', async (req, res) => { // To DO: verifyToken, ta add korte hbe 
+      const email = req.query.email;
+      console.log(email);
+      const query = { email: email }
+
+      const result = await bookingCollection.find(query).toArray();
       res.send(result)
     })
+
+    // get data by email 
+    // app.get('/article/user', async (req, res) => {
+    //   const email = req.query.email;
+    //   // console.log("its a my card", email);
+    //   const query = { articleAuthorEmail: email }
+    //   const result = await articleCollection.find(query).toArray();
+    //   console.log(result);
+    //   res.send(result)
+    // });
+
+
+
     // booking statust relatede 
     app.patch('/bookings/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
